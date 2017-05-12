@@ -1,0 +1,16 @@
+tty-to-stdout forces programs that want to write to a tty to send the output to stdout
+
+A program might check that its stdout is connected to a tty and not want to write to stdout unless it is. Perhaps the program checks what the current ttyslot() is and try to write to that directly.
+
+tty-to-stdout will spawn a pseudo-tty, exec the process in a forked child with tty set to that new psuedo-tty, then send the output in the parent process to a line buffered stdout.
+
+The motivating use case for tty-to-stdout is /usr/bin/log in macos 10.12, which will write its output to the tty even when stdout is captured in some way.
+
+$ log stream | grep sshd
+..still see all the log messages here, not just sshd..
+$ log stream > some-file
+..messages still appear here..
+$ tty-to-stdout log stream > some-file
+..all output goes to some-file..
+$ tty-to-stdout log stream | grep sshd
+..only sshd messages show up..
